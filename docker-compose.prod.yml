@@ -7,6 +7,8 @@ services:
       - "8081:8080"
     env_file:
       - .env
+    volumes:
+      - /var/www/nineshop/uploads:/app/uploads
     depends_on:
       - postgres-db
       - redis-server
@@ -33,12 +35,6 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
-    # No "ports:" here on purpose: Postgres only needs to be reachable from
-    # other containers on nineshop-net, never from the internet. If you need
-    # to inspect it from your own machine, use:
-    #   ssh -L 5432:localhost:5432 <vps-user>@<vps-ip>
-    # then connect to localhost:5432 through the tunnel instead of opening
-    # the port publicly.
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
@@ -48,7 +44,6 @@ services:
     image: redis:alpine
     container_name: nineshop-redis
     restart: always
-    # Same reasoning as Postgres: no public port.
     volumes:
       - redisdata:/data
     networks:
@@ -58,8 +53,6 @@ services:
     image: rabbitmq:3-management-alpine
     container_name: nineshop-rabbitmq
     restart: always
-    # Same reasoning again. If you need the 15672 management UI, tunnel to it
-    # with SSH port-forwarding rather than exposing it publicly.
     volumes:
       - rabbitmqdata:/var/lib/rabbitmq
     networks:
